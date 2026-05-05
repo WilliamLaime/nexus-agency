@@ -17,7 +17,7 @@
 
 Les frameworks multi-agents existants se concentrent sur la technique (swarms, mémoire, MCP) mais ignorent deux problèmes critiques pour les agences professionnelles :
 
-1. **Couverture métier incomplète** — pas d'agents pour le design, le SEO, la relation client, l'accessibilité, l'éco-conception
+1. **Couverture métier incomplète** — pas d'agents pour le design, le SEO, la documentation client, l'accessibilité, l'éco-conception
 2. **Sécurité en afterthought** — PII, injection de prompt, secrets dans les outputs sont des problèmes réels en production
 
 Nexus résout les deux, avec la sécurité comme couche fondatrice.
@@ -50,7 +50,7 @@ Nexus résout les deux, avec la sécurité comme couche fondatrice.
 | Agents data & analytics | ✗ | **✓ (3 agents)** |
 | Agents DevOps & SRE | ✗ | **✓ (3 agents)** |
 | Agents sécurité dédiés | ✗ | **✓ (3 agents)** |
-| Agents relation client | ✗ | **✓ (2 agents)** |
+| Agents documentation client (briefs, CR, onboarding) | ✗ | **✓ (2 agents)** |
 | **Audit RGAA 4.1.2 intégré** | ✗ | **✓** |
 | **Audit WCAG 2.1/2.2 intégré** | ✗ | **✓** |
 | **Audit RGESN 2024 (éco-conception)** | ✗ | **✓** |
@@ -140,33 +140,35 @@ Pour réduire les allers-retours avec le plugin d'audit, trois agents embarquent
 
 ## Démarrage rapide
 
-### Prérequis
-- Node.js 20+
-- TypeScript 6+
+### Mode Claude Code (recommandé)
 
-### Installation
+Les agents Nexus sont des définitions TypeScript — il suffit de cloner le repo et de l'ouvrir dans Claude Code. Aucune configuration requise : Claude Code gère déjà la clé API Anthropic.
 
 ```bash
 git clone https://github.com/WilliamLaime/nexus-agency.git
 cd nexus-agency
-npm install
+claude  # ouvre Claude Code dans le projet
 ```
 
-### Configuration
+Les 38 agents sont immédiatement disponibles comme contexte pour Claude Code. Les checklists accessibilité, les system prompts spécialisés et le registre centralisé sont prêts à l'emploi.
+
+### Mode runtime autonome (avancé)
+
+Si tu veux faire tourner la couche sécurité TypeScript comme un serveur Node.js indépendant (PII detector, audit logger, namespace isolator chiffré...) :
+
+**Prérequis** : Node.js 20+, TypeScript 6+
 
 ```bash
+npm install
 cp .env.example .env
-# Éditer .env avec vos clés
 ```
 
-Variables obligatoires :
+Variables nécessaires uniquement pour ce mode :
 ```env
-ANTHROPIC_API_KEY=sk-ant-...
-NEXUS_MEMORY_ENCRYPTION_KEY=$(openssl rand -base64 32)
-NEXUS_AGENT_SECRET=$(openssl rand -hex 32)
+ANTHROPIC_API_KEY=sk-ant-...                          # clé Anthropic pour les appels LLM
+NEXUS_MEMORY_ENCRYPTION_KEY=$(openssl rand -base64 32) # chiffrement AES-256-GCM des namespaces
+NEXUS_AGENT_SECRET=$(openssl rand -hex 32)             # signature JWT inter-agents
 ```
-
-### Vérification de la configuration
 
 ```bash
 npm run lint           # TypeScript type check (0 erreur attendue)
