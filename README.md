@@ -138,19 +138,110 @@ Pour réduire les allers-retours avec le plugin d'audit, trois agents embarquent
 
 ---
 
-## Démarrage rapide
+## Installer Nexus sur ton projet
 
-### Mode Claude Code (recommandé)
+Nexus est une bibliothèque d'agents — pas une application à faire tourner. Tu l'intègres dans **ton** projet, sous **ton** nom. Voici les trois façons de le faire.
 
-Les agents Nexus sont des définitions TypeScript — il suffit de cloner le repo et de l'ouvrir dans Claude Code. Aucune configuration requise : Claude Code gère déjà la clé API Anthropic.
+---
+
+### Cas 1 — Tu pars de zéro (nouveau projet)
+
+Tu veux créer `mon-agence`, `studio-x`, ou n'importe quel nom — tu utilises Nexus comme base de départ.
 
 ```bash
-git clone https://github.com/WilliamLaime/nexus-agency.git
-cd nexus-agency
-claude  # ouvre Claude Code dans le projet
+# Cloner en renommant le dossier directement
+git clone https://github.com/WilliamLaime/nexus-agency.git mon-agence
+cd mon-agence
+
+# Détacher du repo Nexus et créer ton propre historique git
+rm -rf .git
+git init
+git add .
+git commit -m "init: base Nexus"
+
+# Ouvrir dans Claude Code
+claude
 ```
 
-Les 38 agents sont immédiatement disponibles comme contexte pour Claude Code. Les checklists accessibilité, les system prompts spécialisés et le registre centralisé sont prêts à l'emploi.
+C'est tout. Ton projet s'appelle `mon-agence`, les 38 agents sont là, Claude Code les utilise immédiatement.
+
+---
+
+### Cas 2 — Tu as déjà un projet (intégration dans l'existant)
+
+Tu as déjà `mon-projet/` avec son propre code, et tu veux ajouter les agents Nexus dedans.
+
+```bash
+cd mon-projet
+
+# Copier uniquement les agents et la doc
+git clone https://github.com/WilliamLaime/nexus-agency.git /tmp/nexus
+cp -r /tmp/nexus/agents ./agents
+cp /tmp/nexus/AGENTS.md ./AGENTS.md
+rm -rf /tmp/nexus
+```
+
+Ensuite, ajouter les instructions Nexus à ton `CLAUDE.md` existant (ou le créer s'il n'existe pas) :
+
+```bash
+# Ajouter le contenu du CLAUDE.md de Nexus au tien
+curl -s https://raw.githubusercontent.com/WilliamLaime/nexus-agency/main/CLAUDE.md >> CLAUDE.md
+```
+
+Claude Code lit automatiquement `CLAUDE.md` à l'ouverture du projet — les agents sont immédiatement actifs.
+
+---
+
+### Cas 3 — Tu veux rester synchronisé avec les mises à jour Nexus
+
+Tu veux pouvoir récupérer les nouveaux agents quand ils sortent, sans écraser ton propre code.
+
+```bash
+cd mon-projet
+
+# Ajouter Nexus comme remote secondaire
+git remote add nexus https://github.com/WilliamLaime/nexus-agency.git
+git fetch nexus
+
+# Récupérer uniquement le dossier agents via subtree
+git subtree add --prefix=agents nexus main --squash
+```
+
+Pour mettre à jour les agents plus tard :
+```bash
+git subtree pull --prefix=agents nexus main --squash
+```
+
+---
+
+### Ce que lit Claude Code
+
+Le fichier `CLAUDE.md` à la racine de ton projet est **la clé**. C'est lui qui dit à Claude Code comment utiliser les agents, quelle stack tu utilises, et quelles règles respecter. Si tu intègres Nexus dans un projet existant, copie ou fusionne son contenu dans ton `CLAUDE.md`.
+
+```
+mon-projet/
+├── CLAUDE.md        ← Claude Code lit ça en premier à chaque session
+├── agents/          ← les 38 agents (system prompts + checklists)
+│   ├── registry.ts
+│   ├── dev/
+│   ├── qa/
+│   └── ...
+└── [ton code]
+```
+
+---
+
+## Démarrage rapide (mode Claude Code)
+
+Une fois installé selon l'une des méthodes ci-dessus :
+
+```bash
+claude  # ouvre Claude Code dans ton projet
+```
+
+Les 38 agents sont disponibles. Les checklists accessibilité, les system prompts spécialisés et le registre centralisé sont prêts à l'emploi. Aucune clé API supplémentaire requise.
+
+---
 
 ### Mode runtime autonome (avancé)
 
