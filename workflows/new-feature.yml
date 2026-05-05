@@ -1,0 +1,231 @@
+name: new-feature
+description: Workflow complet de création d'une nouvelle feature, de la stratégie au déploiement
+version: "1.0"
+
+trigger:
+  type: manual
+  inputs:
+    - name: feature_brief
+      type: string
+      required: true
+      description: "Description de la feature à développer"
+    - name: client_namespace
+      type: string
+      required: true
+      description: "Namespace client (ex: acme-corp)"
+    - name: sprint_id
+      type: string
+      required: true
+      description: "Identifiant du sprint (ex: sprint-2026-05)"
+
+security:
+  init_required: true
+  trust_level: VERIFIED
+  pii_check: true
+  audit_all_steps: true
+
+steps:
+  - id: security_init
+    agent: security-architect
+    action: threat_model
+    description: "Threat modeling initial de la feature"
+    trust_required: TRUSTED
+    outputs:
+      - threat_model
+      - security_requirements
+
+  - id: product_definition
+    agent: product-owner
+    action: write_user_stories
+    description: "Rédaction des user stories avec critères d'acceptation"
+    inputs:
+      - from: trigger.feature_brief
+    outputs:
+      - user_stories
+      - acceptance_criteria
+    trust_required: VERIFIED
+
+  - id: ux_research
+    agent: ux-researcher
+    action: analyze_user_needs
+    description: "Analyse des besoins utilisateurs et personas"
+    inputs:
+      - from: product_definition.user_stories
+    outputs:
+      - personas
+      - user_journey
+    trust_required: VERIFIED
+
+  - id: ux_design
+    agent: ux-designer
+    action: create_wireframes
+    description: "Création des wireframes et arborescence"
+    inputs:
+      - from: ux_research.user_journey
+      - from: product_definition.user_stories
+    outputs:
+      - wireframes
+      - navigation_tree
+    trust_required: VERIFIED
+
+  - id: ui_design
+    agent: ui-designer
+    action: create_design_specs
+    description: "Spécifications visuelles et design tokens"
+    inputs:
+      - from: ux_design.wireframes
+    outputs:
+      - design_specs
+      - component_list
+    trust_required: VERIFIED
+
+  - id: copywriting
+    agent: copywriter
+    action: write_ui_copy
+    description: "Rédaction des textes UI et microcopy"
+    inputs:
+      - from: ux_design.wireframes
+      - from: ui_design.design_specs
+    outputs:
+      - ui_copy
+      - cta_texts
+    trust_required: VERIFIED
+
+  - id: technical_architecture
+    agent: architect
+    action: design_architecture
+    description: "Architecture technique de la feature"
+    inputs:
+      - from: product_definition.user_stories
+      - from: security_init.security_requirements
+    outputs:
+      - technical_spec
+      - api_contracts
+    trust_required: VERIFIED
+
+  - id: tech_review
+    agent: tech-lead
+    action: review_architecture
+    description: "Revue d'architecture et standards de code"
+    inputs:
+      - from: technical_architecture.technical_spec
+    outputs:
+      - approved_spec
+      - code_standards
+    trust_required: VERIFIED
+
+  - id: development
+    parallel: true
+    steps:
+      - id: frontend_dev
+        agent: frontend-dev
+        action: implement_frontend
+        inputs:
+          - from: ui_design.design_specs
+          - from: technical_architecture.api_contracts
+          - from: copywriting.ui_copy
+        outputs:
+          - frontend_code
+        trust_required: VERIFIED
+
+      - id: backend_dev
+        agent: backend-dev
+        action: implement_backend
+        inputs:
+          - from: technical_architecture.api_contracts
+          - from: security_init.security_requirements
+        outputs:
+          - backend_code
+          - api_implementation
+        trust_required: VERIFIED
+
+  - id: security_audit
+    agent: security-auditor
+    action: audit_implementation
+    description: "Audit OWASP de l'implémentation"
+    inputs:
+      - from: development.frontend_code
+      - from: development.backend_code
+      - from: security_init.threat_model
+    outputs:
+      - security_report
+      - vulnerabilities
+    trust_required: TRUSTED
+    blocking: true
+
+  - id: qa_testing
+    parallel: true
+    depends_on: [security_audit]
+    steps:
+      - id: automation_tests
+        agent: automation-tester
+        action: run_e2e_tests
+        inputs:
+          - from: product_definition.acceptance_criteria
+        outputs:
+          - test_results
+        trust_required: VERIFIED
+
+      - id: manual_tests
+        agent: manual-tester
+        action: run_acceptance_tests
+        inputs:
+          - from: product_definition.acceptance_criteria
+        outputs:
+          - acceptance_report
+        trust_required: VERIFIED
+
+      - id: a11y_audit
+        agent: a11y-auditor
+        action: audit_accessibility
+        inputs:
+          - from: development.frontend_code
+        outputs:
+          - a11y_report
+        trust_required: VERIFIED
+
+      - id: performance_audit
+        agent: performance-auditor
+        action: audit_performance
+        outputs:
+          - performance_report
+          - lighthouse_scores
+        trust_required: VERIFIED
+
+  - id: deployment
+    agent: devops-engineer
+    action: deploy
+    description: "Déploiement en production"
+    depends_on: [qa_testing]
+    inputs:
+      - from: development.frontend_code
+      - from: development.backend_code
+    outputs:
+      - deployment_url
+    trust_required: TRUSTED
+    condition:
+      - security_audit.vulnerabilities.critical == 0
+      - qa_testing.automation_tests.test_results.passed == true
+
+  - id: analytics_setup
+    agent: data-analyst
+    action: setup_tracking
+    description: "Configuration analytics et KPIs"
+    inputs:
+      - from: deployment.deployment_url
+      - from: product_definition.user_stories
+    outputs:
+      - tracking_plan
+    trust_required: VERIFIED
+
+post_workflow:
+  workers:
+    - audit-worker
+    - quality-score-worker
+  notifications:
+    - account-manager
+    - customer-success
+
+memory:
+  store_patterns: true
+  namespace_template: "{client_namespace}-{sprint_id}"

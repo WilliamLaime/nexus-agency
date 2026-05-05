@@ -1,23 +1,39 @@
 {
   "name": "nexus-agency",
   "version": "1.0.0",
-  "description": "Orchestration IA multi-agents pour les agences numériques : Strategy, Design, Dev, QA, Data &amp; Security",
+  "description": "Orchestration IA multi-agents pour les agences numériques : Strategy, Design, Dev, QA, Data & Security",
   "main": "index.js",
+  "type": "module",
   "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node-esm index.ts",
+    "security:audit": "ts-node-esm workers/cve-monitor-worker.ts",
+    "lint": "tsc --noEmit",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/WilliamLaime/nexus-agency.git"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
+  "keywords": [
+    "multi-agent",
+    "ai",
+    "orchestration",
+    "agency",
+    "security",
+    "mcp"
+  ],
+  "author": "William Laimé",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/WilliamLaime/nexus-agency/issues"
   },
   "homepage": "https://github.com/WilliamLaime/nexus-agency#readme",
+  "dependencies": {
+    "pino": "^9.5.0",
+    "zod": "^3.23.8"
+  },
   "devDependencies": {
     "@types/node": "^25.6.0",
     "ts-node": "^10.9.2",

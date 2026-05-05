@@ -1,0 +1,149 @@
+name: security-audit
+description: Audit de sécurité complet — OWASP, CVE, RGPD, conformité bancaire
+version: "1.0"
+
+trigger:
+  type: scheduled
+  schedule: "0 2 * * 1"
+  manual: true
+  inputs:
+    - name: client_namespace
+      type: string
+      required: true
+    - name: audit_scope
+      type: enum
+      values: [full, owasp, cve, rgpd, banking]
+      default: full
+
+security:
+  init_required: true
+  trust_level: TRUSTED
+  audit_all_steps: true
+
+steps:
+  - id: cve_scan
+    agent: cve-monitor
+    action: run_audit
+    description: "Scan CVE sur toutes les dépendances npm"
+    outputs:
+      - cve_report
+      - critical_count
+      - high_count
+    trust_required: TRUSTED
+
+  - id: secret_scan
+    agent: secret-scanner
+    action: scan_codebase
+    description: "Scan de secrets dans le code source et les outputs"
+    outputs:
+      - secret_findings
+      - clean_codebase
+    trust_required: TRUSTED
+
+  - id: owasp_audit
+    agent: security-auditor
+    action: owasp_top10_audit
+    description: "Audit complet OWASP Top 10"
+    outputs:
+      - owasp_report
+      - vulnerabilities
+      - cvss_scores
+    trust_required: TRUSTED
+
+  - id: pii_sweep
+    agent: pii-sweep-worker
+    action: full_memory_scan
+    description: "Scan complet de la mémoire vectorielle pour données résiduelles"
+    outputs:
+      - pii_findings
+      - clean_namespaces
+    trust_required: TRUSTED
+
+  - id: compliance_check
+    agent: compliance-officer
+    action: rgpd_audit
+    description: "Vérification conformité RGPD et réglementaire"
+    inputs:
+      - from: pii_sweep.pii_findings
+    outputs:
+      - compliance_report
+      - rgpd_violations
+    trust_required: TRUSTED
+
+  - id: banking_compliance
+    agent: compliance-officer
+    action: banking_audit
+    description: "Conformité normes bancaires (DSP2, PCI-DSS si applicable)"
+    condition:
+      - trigger.audit_scope == 'banking' OR trigger.audit_scope == 'full'
+    outputs:
+      - banking_report
+    trust_required: TRUSTED
+
+  - id: threat_model_review
+    agent: security-architect
+    action: review_threat_model
+    description: "Revue du threat model et mise à jour"
+    inputs:
+      - from: owasp_audit.vulnerabilities
+      - from: cve_scan.cve_report
+    outputs:
+      - updated_threat_model
+      - remediation_plan
+    trust_required: TRUSTED
+
+  - id: final_report
+    agent: security-architect
+    action: compile_report
+    description: "Rapport de sécurité final consolidé"
+    inputs:
+      - from: cve_scan.cve_report
+      - from: owasp_audit.owasp_report
+      - from: compliance_check.compliance_report
+      - from: pii_sweep.pii_findings
+      - from: threat_model_review.remediation_plan
+    outputs:
+      - security_report_path
+      - executive_summary
+    trust_required: TRUSTED
+
+  - id: tech_lead_handoff
+    agent: tech-lead
+    action: create_remediation_tickets
+    description: "Création des tickets de remédiation priorisés"
+    inputs:
+      - from: final_report.executive_summary
+      - from: threat_model_review.remediation_plan
+    outputs:
+      - remediation_tickets
+    trust_required: VERIFIED
+
+  - id: devops_hardening
+    agent: devops-engineer
+    action: apply_security_patches
+    description: "Application des patches de sécurité non-bloquants"
+    inputs:
+      - from: cve_scan.cve_report
+    trust_required: TRUSTED
+    condition:
+      - cve_scan.critical_count == 0
+
+post_workflow:
+  workers:
+    - audit-worker
+    - secret-rotation-reminder-worker
+  store_report: true
+  report_path: "reports/security/audit-{date}.json"
+  notify:
+    - security-architect
+    - compliance-officer
+    - account-manager
+
+blocking_conditions:
+  - description: "Bloquer le déploiement si CVE critique"
+    condition: cve_scan.critical_count > 0
+    action: halt_all_deployments
+
+memory:
+  store_patterns: true
+  namespace_template: "{client_namespace}-security"
