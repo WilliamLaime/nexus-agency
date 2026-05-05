@@ -1,6 +1,6 @@
 # Nexus Agency
 
-> Framework open-source d'orchestration multi-agents pour agences digitales — de la stratégie au déploiement, avec sécurité enterprise dès la fondation.
+> Framework open-source d'orchestration multi-agents pour agences digitales — de la stratégie au déploiement, avec sécurité entreprise dès la fondation.
 
 ![TypeScript](https://img.shields.io/badge/TypeScript-6.0-blue?logo=typescript)
 ![Node.js](https://img.shields.io/badge/Node.js-20+-green?logo=node.js)
@@ -56,6 +56,8 @@ Nexus résout les deux, avec la sécurité comme couche fondatrice.
 | **Audit RGESN 2024 (éco-conception)** | ✗ | **✓** |
 | **Checklists a11y design → dev** | ✗ | **✓** |
 | Conformité bancaire (CA/CACD2) | ✗ | **✓** |
+
+> **CA/CACD2** : Crédit Agricole et sa filiale [CACD2](https://www.ca-consumerfinance.com) (CA Consumer Finance Digital). Ces environnements bancaires imposent des contraintes spécifiques : détection renforcée des données PII sensibles (IBAN, NIR, numéros de contrat CA), journalisation conforme DSP2 (directive européenne sur les services de paiement), cloisonnement strict des données entre clients, supervision ACPR, et politique de rotation des secrets tous les 30 jours. Activer avec `NEXUS_BANKING_MODE=true`.
 
 ---
 
@@ -237,7 +239,7 @@ npm run security:audit
 
 ## Sécurité
 
-Nexus est conçu pour des environnements exigeants incluant les banques et institutions financières (CACD2 / Crédit Agricole).
+Nexus est conçu pour des environnements exigeants incluant les banques et institutions financières. Il a notamment été pensé pour répondre aux contraintes de **CACD2** (CA Consumer Finance Digital, filiale de Crédit Agricole) : réglementation DSP2, supervision ACPR, traitement de données PII bancaires sensibles (IBAN, NIR, numéros de contrat), et exigences de traçabilité non répudiable. Activer le mode bancaire renforcé : `NEXUS_BANKING_MODE=true`.
 
 - **PII** : 14 types détectés automatiquement, aucune donnée sensible ne traverse les agents sans traitement
 - **Injection** : 20+ patterns de prompt injection détectés et bloqués (5 catégories + base64)
