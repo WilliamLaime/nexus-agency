@@ -163,42 +163,49 @@ Chaque agent respecte le pattern `AgentDefinition` défini dans `plugins/nexus-c
 - **Envoie à** : frontend-dev, backend-dev, devops-engineer
 - **Output** : markdown (guidelines, revue de code)
 
-### `frontend-dev`
+### `frontend-dev` ← Implémenté dans `agents/dev/frontend-dev.ts`
 - **Domaine** : dev
 - **Trust** : VERIFIED
-- **Rôle** : Implémentation HTML/CSS/JS, composants UI, accessibilité, responsive design
+- **Stack principale** : React 18+ (hooks, RSC, Zustand, React Query, Next.js 14+, Vite)
+- **Stack secondaire** : Vue 3 (Composition API, Pinia, Nuxt 3)
+- **Rôle** : Composants UI TypeScript strict, accessibilité WCAG 2.1 AA, optimisation Core Web Vitals, tests Vitest/RTL
 - **Reçoit de** : ui-designer, ux-designer, tech-lead
 - **Envoie à** : qa-lead, devops-engineer
 - **Output** : markdown (code, documentation)
 
-### `backend-dev`
+### `backend-dev` ← Implémenté dans `agents/dev/backend-dev.ts`
 - **Domaine** : dev
 - **Trust** : VERIFIED
-- **Rôle** : API REST/GraphQL, logique métier, bases de données, sécurité backend
+- **Stack principale** : Node.js (NestJS/Fastify, Prisma/TypeORM, Jest, OpenAPI 3.1)
+- **Stack secondaire** : Java (Spring Boot 3, Spring Security 6, JPA/Hibernate, Maven/Gradle)
+- **Rôle** : API REST/GraphQL, sécurité OWASP backend, migrations DB, JWT/OAuth2, containerisation Docker
 - **Reçoit de** : architect, tech-lead, security-architect
 - **Envoie à** : qa-lead, devops-engineer
 - **Output** : markdown (code, specs API)
 
-### `mobile-dev`
+### `mobile-dev` ← Implémenté dans `agents/dev/mobile-dev.ts`
 - **Domaine** : dev
 - **Trust** : VERIFIED
-- **Rôle** : Applications iOS/Android, React Native, PWA, optimisation mobile
+- **Stack** : React Native (Expo SDK 51+, React Navigation, Zustand), PWA (Workbox 7+)
+- **Rôle** : Applications iOS/Android, offline-first, sécurité stockage (SecureStore), optimisation performance mobile
 - **Reçoit de** : ui-designer, tech-lead
 - **Envoie à** : qa-lead
 - **Output** : markdown (code mobile)
 
-### `fullstack-dev`
+### `fullstack-dev` ← Implémenté dans `agents/dev/fullstack-dev.ts`
 - **Domaine** : dev
 - **Trust** : VERIFIED
-- **Rôle** : Développement full stack, intégrations complexes, prototypage rapide
+- **Stack** : Next.js 14+ (App Router, Server Actions), tRPC v11, Prisma, Turborepo
+- **Rôle** : Prototypage rapide, intégrations complexes, architecture Server/Client Components, Auth.js
 - **Reçoit de** : tech-lead, architect
 - **Envoie à** : qa-lead
 - **Output** : markdown
 
-### `integrator`
+### `integrator` ← Implémenté dans `agents/dev/integrator.ts`
 - **Domaine** : dev
 - **Trust** : VERIFIED
-- **Rôle** : Intégrations CMS, outils tiers, connecteurs, webhooks, APIs partenaires
+- **Stack** : Node.js + SDKs partenaires, CMS headless (Strapi 5, Contentful, Sanity), BullMQ
+- **Rôle** : Connecteurs CMS, webhooks signés HMAC, APIs partenaires (Stripe, Shopify), file d'attente asynchrone
 - **Reçoit de** : backend-dev, tech-lead
 - **Envoie à** : qa-lead, devops-engineer
 - **Output** : markdown (documentation intégration)
@@ -262,6 +269,24 @@ Chaque agent respecte le pattern `AgentDefinition` défini dans `plugins/nexus-c
 - **Reçoit de** : qa-lead, ux-designer
 - **Envoie à** : ux-designer, cro-specialist
 - **Output** : markdown (rapport tests UX)
+
+### `rgaa-wcag-auditor` ← Implémenté dans `agents/qa/rgaa-wcag-auditor.ts`
+- **Domaine** : qa
+- **Trust** : VERIFIED
+- **Plugin** : [Numérique Responsable](https://github.com/WilliamLaime/numerique-responsable) (`mcp-numerique-responsable`)
+- **Rôle** : Audit accessibilité automatisé + manuel — RGAA 4.1.2 pour les sites français (obligations légales), WCAG 2.1/2.2 pour les sites internationaux. 106 critères, 13 thématiques, tests lecteurs d'écran
+- **Reçoit de** : qa-lead, frontend-dev, compliance-officer
+- **Envoie à** : frontend-dev, qa-lead, compliance-officer
+- **Output** : markdown (rapport RGAA/WCAG + déclaration d'accessibilité)
+
+### `rgesn-auditor` ← Implémenté dans `agents/qa/rgesn-auditor.ts`
+- **Domaine** : qa
+- **Trust** : VERIFIED
+- **Plugin** : [Numérique Responsable](https://github.com/WilliamLaime/numerique-responsable) (`mcp-numerique-responsable`)
+- **Rôle** : Audit éco-conception automatisé + manuel selon RGESN 2024 — 79 critères, 9 thématiques, score pondéré par thématique, calcul EcoIndex, plan de remédiation avec estimation CO₂
+- **Reçoit de** : qa-lead, frontend-dev, devops-engineer, compliance-officer
+- **Envoie à** : frontend-dev, qa-lead, compliance-officer, cloud-architect
+- **Output** : markdown (rapport RGESN + score éco-conception + déclaration)
 
 ---
 
