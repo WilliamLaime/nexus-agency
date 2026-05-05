@@ -263,70 +263,78 @@ NEXUS_AGENT_SECRET=$(openssl rand -hex 32)             # signature JWT inter-age
 
 ```bash
 npm run lint           # TypeScript type check (0 erreur attendue)
-npm run security:audit # Scan CVE des dépendances
+npm run security:audit # Scan CVE des dépendances → reports/security/cve-YYYY-MM-DD.json
 ```
 
 ---
 
-## Utilisation
+## Utilisation — exemples Claude Code
 
-### Charger tous les agents via le registre
+Pas de code à écrire. Tu ouvres Claude Code dans ton projet et tu décris ta tâche en langage naturel. `CLAUDE.md` oriente Claude vers le bon agent selon le domaine.
 
-```typescript
-import { initSecurity } from './security/index.js'
+### Strategy & Product
 
-async function main() {
-  await initSecurity()
+> "Crée les user stories pour une feature de paiement en ligne"
 
-  // Import depuis le registre centralisé
-  const { FrontendDev, RGAAWCAGAuditor, RGESNAuditor } = await import('./agents/registry.js')
+→ `product-owner`
 
-  const { orchestrator } = await import('./plugins/nexus-core/index.js')
-  await orchestrator.init()
+> "Analyse les besoins fonctionnels de ce cahier des charges et identifie les cas limites"
 
-  orchestrator.register(FrontendDev)
-  orchestrator.register(RGAAWCAGAuditor)
-  orchestrator.register(RGESNAuditor)
-}
-```
+→ `business-analyst`
 
-### Exécuter un agent
+### Design
 
-```typescript
-const result = await orchestrator.runAgent(
-  'product-owner',
-  'Créer les user stories pour une feature de paiement en ligne',
-  {
-    namespace: 'acme-corp-strategy',
-    trustLevel: 'VERIFIED',
-    sessionId: 'session-001',
-  },
-  async (input, ctx) => {
-    // Implémentation avec Anthropic SDK
-    return `User story générée pour: ${input}`
-  }
-)
+> "Génère les wireframes du tunnel de commande en mobile-first"
 
-console.log(result.output)
-```
+→ `ux-designer`
 
-### Lancer un audit accessibilité
+> "Crée le design system tokens pour une fintech : couleurs, typographie, spacing, dark mode"
 
-```typescript
-const auditResult = await orchestrator.runAgent(
-  'rgaa-wcag-auditor',
-  'Auditer https://mon-site.fr selon RGAA 4.1.2',
-  { namespace: 'mon-client-qa', trustLevel: 'VERIFIED', sessionId: 'audit-001' },
-  async (input, ctx) => { /* ... */ }
-)
-```
+→ `ui-designer`
 
-### Scanner les CVE
+### Développement
 
-```bash
-npm run security:audit
-# Génère reports/security/cve-YYYY-MM-DD.json
-```
+> "Implémente un composant React de formulaire de paiement accessible (WCAG AA)"
+
+→ `frontend-dev`
+
+> "Crée l'endpoint REST POST /orders avec validation Zod, gestion d'erreurs et tests Jest"
+
+→ `backend-dev`
+
+> "Génère le pipeline CI/CD GitHub Actions pour ce projet Next.js avec tests et deploy Vercel"
+
+→ `devops-engineer`
+
+### QA & Accessibilité
+
+> "Audite cette page selon RGAA 4.1.2 et liste toutes les non-conformités"
+
+→ `rgaa-wcag-auditor` (via plugin Numérique Responsable)
+
+> "Génère la déclaration d'accessibilité officielle pour ce service"
+
+→ `rgaa-wcag-auditor`
+
+> "Rédige les cas de test end-to-end pour le tunnel de commande"
+
+→ `qa-lead`
+
+### Éco-conception
+
+> "Calcule le score RGESN de cette application et propose les 5 optimisations prioritaires"
+
+→ `rgesn-auditor` (via plugin Numérique Responsable)
+
+### Sécurité
+
+> "Audite ce code pour les vulnérabilités OWASP Top 10"
+
+→ `security-auditor`
+
+> "Vérifie que cette API ne fuite pas de données PII dans ses réponses"
+
+→ `security-auditor`
 
 ---
 
