@@ -26,35 +26,37 @@ Nexus résout les deux, avec la sécurité comme couche fondatrice.
 
 ## Comparatif Nexus vs Ruflo
 
+Légende : **✓** = implémenté + testé · **◐** = partiel / stub · **✗** = absent
+
 | Fonctionnalité | Ruflo | Nexus |
 |---|:---:|:---:|
-| Architecture swarm | ✓ | ✓ |
-| Mémoire vectorielle (HNSW) | ✓ | ✓ |
-| MCP (Model Context Protocol) | ✓ | ✓ |
-| Auto-amélioration (workers) | ✓ | ✓ |
-| Plugin architecture | ✓ | ✓ |
+| Architecture swarm | ✓ | ◐ |
+| Mémoire vectorielle (HNSW) | ✓ | ✗ |
+| MCP (Model Context Protocol) | ✓ | ✗ |
+| Auto-amélioration (workers) | ✓ | ◐ |
+| Plugin architecture | ✓ | **✓** |
 | **Couche sécurité dédiée** | ✗ | **✓** |
 | **Détection PII (14 types)** | ✗ | **✓** |
-| **Prompt injection guard** | Partiel | **✓ (5 catégories + encodé)** |
+| **Prompt injection guard** | Partiel | **✓ (5 catégories, FR + EN)** |
 | **Secret scanner sur outputs** | ✗ | **✓** |
 | **Namespace isolator (AES-256-GCM)** | ✗ | **✓** |
-| **Audit log immuable (RGPD)** | ✗ | **✓** |
+| **Audit log hash chain (RGPD)** | ✗ | **✓** |
 | **Trust policy inter-agents** | ✗ | **✓** |
 | **CVE monitor hebdomadaire** | ✗ | **✓** |
-| **Agents métier agence (38)** | ✗ | **✓** |
-| Agents strategy (PO, PM, BA...) | ✗ | **✓ (5 agents)** |
+| **Agents métier agence (41)** | ✗ | **✓** |
+| Agents strategy (PO, PM, Architect...) | ✗ | **✓ (6 agents)** |
 | Agents design (UX, UI, Motion...) | ✗ | **✓ (4 agents)** |
 | Agents contenu (SEO, Social, i18n...) | ✗ | **✓ (5 agents)** |
-| Agents dev (React+Vue, Node.js+Java...) | ✗ | **✓ (5 agents)** |
+| Agents dev (Architect, TechLead, React+Node...) | ✗ | **✓ (7 agents)** |
 | Agents QA (a11y, perf, security, RGAA...) | ✗ | **✓ (8 agents)** |
 | Agents data & analytics | ✗ | **✓ (3 agents)** |
 | Agents DevOps & SRE | ✗ | **✓ (3 agents)** |
 | Agents sécurité dédiés | ✗ | **✓ (3 agents)** |
-| Agents documentation client (briefs, CR, onboarding) | ✗ | **✓ (2 agents)** |
-| **Audit RGAA 4.1.2 intégré** | ✗ | **✓** |
-| **Audit WCAG 2.1/2.2 intégré** | ✗ | **✓** |
-| **Audit RGESN 2024 (éco-conception)** | ✗ | **✓** |
-| **Checklists a11y design → dev** | ✗ | **✓** |
+| Agents relation client (briefs, CR, onboarding) | ✗ | **✓ (2 agents)** |
+| **Audit RGAA 4.1.2** | ✗ | **◐** |
+| **Audit WCAG 2.1/2.2** | ✗ | **◐** |
+| **Audit RGESN 2024 (éco-conception)** | ✗ | **◐** |
+| **Checklists a11y design → dev** | ✗ | **◐** |
 | Conformité bancaire (CA/CACD2) | ✗ | **✓** |
 
 > **CA/CACD2** : Crédit Agricole et sa filiale [CACD2](https://www.ca-consumerfinance.com) (CA Consumer Finance Digital). Ces environnements bancaires imposent des contraintes spécifiques : détection renforcée des données PII sensibles (IBAN, NIR, numéros de contrat CA), journalisation conforme DSP2 (directive européenne sur les services de paiement), cloisonnement strict des données entre clients, supervision ACPR, et politique de rotation des secrets tous les 30 jours. Activer avec `NEXUS_BANKING_MODE=true`.
