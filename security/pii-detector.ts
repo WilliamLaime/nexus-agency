@@ -58,7 +58,39 @@ function siretCheck(num: string): boolean {
   return luhnCheck(digits)
 }
 
+function ibanCheck(input: string): boolean {
+  const cleaned = input.replace(/[\s\-]/g, '').toUpperCase()
+  if (cleaned.length < 15 || cleaned.length > 34) return false
+  const rearranged = cleaned.slice(4) + cleaned.slice(0, 4)
+  let numeric = ''
+  for (const ch of rearranged) {
+    if (ch >= '0' && ch <= '9') numeric += ch
+    else if (ch >= 'A' && ch <= 'Z') numeric += String(ch.charCodeAt(0) - 55)
+    else return false
+  }
+  let remainder = 0
+  for (const ch of numeric) {
+    remainder = (remainder * 10 + parseInt(ch, 10)) % 97
+  }
+  return remainder === 1
+}
+
+function nirCheck(input: string): boolean {
+  const cleaned = input.replace(/[\s.\-]/g, '')
+  if (cleaned.length !== 15) return false
+  const number = cleaned.slice(0, 13)
+  const key = parseInt(cleaned.slice(13), 10)
+  // Corse: 2A → 19, 2B → 18
+  let normalized = number
+  if (number.slice(5, 7) === '2A') normalized = number.slice(0, 5) + '19' + number.slice(7)
+  else if (number.slice(5, 7) === '2B') normalized = number.slice(0, 5) + '18' + number.slice(7)
+  if (!/^\d{13}$/.test(normalized)) return false
+  const expected = 97 - Number(BigInt(normalized) % 97n)
+  return expected === key
+}
+
 const HEALTH_TERMS = [
+  // FR
   'diagnostic',
   'pathologie',
   'ordonnance',
@@ -70,6 +102,15 @@ const HEALTH_TERMS = [
   'icd-',
   'cim-10',
   'dossier médical',
+  // EN
+  'diagnosis',
+  'prescription',
+  'medication',
+  'surgery',
+  'hospitalization',
+  'medical history',
+  'icd-10',
+  'patient record',
 ]
 
 const PII_PATTERNS: PIIPattern[] = [
@@ -87,9 +128,10 @@ const PII_PATTERNS: PIIPattern[] = [
   },
   {
     type: 'IBAN',
-    regex: /\b[A-Z]{2}\d{2}[A-Z0-9]{4}\d{7,26}\b/g,
+    regex: /\b[A-Z]{2}\d{2}(?:[\s\-]?[A-Z0-9]{4}){2,7}(?:[\s\-]?[A-Z0-9]{1,4})?\b/g,
     defaultPolicy: 'BLOCK',
     bankingPolicy: 'BLOCK',
+    validate: ibanCheck,
   },
   {
     type: 'CREDIT_CARD',
@@ -110,9 +152,10 @@ const PII_PATTERNS: PIIPattern[] = [
   },
   {
     type: 'NIR',
-    regex: /\b[12]\d{2}(?:0[1-9]|1[0-2]|20)\d{2,3}\d{3}\d{3}\d{2}\b/g,
+    regex: /\b[12](?:[\s.\-]?\d){12,14}\b/g,
     defaultPolicy: 'BLOCK',
     bankingPolicy: 'BLOCK',
+    validate: nirCheck,
   },
   {
     type: 'PASSWORD',
@@ -139,12 +182,17 @@ const PII_PATTERNS: PIIPattern[] = [
     bankingPolicy: 'BLOCK',
   },
   {
+    // FULL_NAME limitation: only detects names preceded by civility prefix (M., Mme, Dr, Pr).
+    // Bare names like "Jean Dupont" CANNOT be reliably detected by regex.
+    // For high-stakes deployments, complement with a NER model (spaCy fr_core_news_lg or CamemBERT-NER).
     type: 'FULL_NAME',
     regex: /\b(?:M\.|Mme\.?|Dr\.?|Pr\.?)\s+[A-ZÀ-Ÿ][a-zà-ÿ]+(?:\s+[A-ZÀ-Ÿ][a-zà-ÿ]+){1,2}\b/g,
     defaultPolicy: 'REDACT',
     bankingPolicy: 'REDACT',
   },
   {
+    // BIRTH_DATE limitation: isolated dates like "12/03/1992" are too ambiguous (version numbers, IDs).
+    // Detection requires an explicit context keyword (né le, dob, birth date...).
     type: 'BIRTH_DATE',
     regex: /(?:né(?:e)?\s+le|date\s+de\s+naissance|dob|birth\s*date)\s*[:]\s*\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4}/gi,
     defaultPolicy: 'REDACT',
