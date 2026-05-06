@@ -8,14 +8,6 @@ export interface EncryptedPayload {
   keyVersion: number
 }
 
-interface NamespaceMetadata {
-  keyVersion: number
-  createdAt: string
-  lastRotatedAt: string
-}
-
-const namespaceRegistry = new Map<string, NamespaceMetadata>()
-
 function getMasterKey(): Buffer {
   const raw = process.env['NEXUS_MEMORY_ENCRYPTION_KEY']
   if (!raw) throw new Error('NEXUS_MEMORY_ENCRYPTION_KEY is not set')
@@ -29,22 +21,9 @@ export function deriveKey(masterKey: Buffer, namespace: string, version = 1): Bu
   return createHmac('sha256', masterKey).update(salt).update('nexus-namespace').digest()
 }
 
-function getOrCreateMetadata(namespace: string): NamespaceMetadata {
-  const existing = namespaceRegistry.get(namespace)
-  if (existing) return existing
-  const meta: NamespaceMetadata = {
-    keyVersion: 1,
-    createdAt: new Date().toISOString(),
-    lastRotatedAt: new Date().toISOString(),
-  }
-  namespaceRegistry.set(namespace, meta)
-  return meta
-}
-
-export async function encrypt(plaintext: string, namespace: string): Promise<EncryptedPayload> {
+export async function encrypt(plaintext: string, namespace: string, keyVersion = 1): Promise<EncryptedPayload> {
   const masterKey = getMasterKey()
-  const meta = getOrCreateMetadata(namespace)
-  const key = deriveKey(masterKey, namespace, meta.keyVersion)
+  const key = deriveKey(masterKey, namespace, keyVersion)
 
   const iv = randomBytes(12)
   const cipher = createCipheriv('aes-256-gcm', key, iv)
@@ -56,7 +35,7 @@ export async function encrypt(plaintext: string, namespace: string): Promise<Enc
     iv: iv.toString('hex'),
     authTag: authTag.toString('hex'),
     ciphertext: encrypted.toString('hex'),
-    keyVersion: meta.keyVersion,
+    keyVersion,
   }
 }
 
@@ -73,26 +52,6 @@ export async function decrypt(payload: EncryptedPayload, namespace: string): Pro
 
   const decrypted = Buffer.concat([decipher.update(ciphertext), decipher.final()])
   return decrypted.toString('utf8')
-}
-
-export async function rotateNamespaceKey(namespace: string): Promise<void> {
-  const meta = getOrCreateMetadata(namespace)
-  const oldVersion = meta.keyVersion
-  meta.keyVersion += 1
-  meta.lastRotatedAt = new Date().toISOString()
-  namespaceRegistry.set(namespace, meta)
-
-  await auditLog({
-    agentName: 'namespace-isolator',
-    action: 'KEY_ROTATION',
-    namespace,
-    outcome: 'ALLOWED',
-    metadata: { oldVersion, newVersion: meta.keyVersion },
-  })
-}
-
-export function getNamespaceMetadata(namespace: string): NamespaceMetadata | undefined {
-  return namespaceRegistry.get(namespace)
 }
 
 export function assertNamespaceAccess(requestingAgent: string, requestedNamespace: string, agentNamespace: string): void {

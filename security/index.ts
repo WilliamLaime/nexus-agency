@@ -7,8 +7,10 @@ export type { AgentInput } from './input-validator.js'
 export { detectPII, configurePolicy } from './pii-detector.js'
 export type { PIIType, PIIPolicy, PIIDetectionResult } from './pii-detector.js'
 
-export { encrypt, decrypt, rotateNamespaceKey, deriveKey, getNamespaceMetadata, assertNamespaceAccess } from './namespace-isolator.js'
+export { encrypt, decrypt, deriveKey, assertNamespaceAccess } from './namespace-isolator.js'
 export type { EncryptedPayload } from './namespace-isolator.js'
+
+export { rotateNamespaceKey, getNamespaceMetadata, initMemory } from '../memory/namespaces.js'
 
 export { assertTrustLevel, evaluateTrust, downgradeTrust, recordViolation, resetTrust } from './trust-policy.js'
 export type { TrustLevel } from './trust-policy.js'
@@ -28,6 +30,7 @@ import { detectPII } from './pii-detector.js'
 import { guardPrompt } from './prompt-injection-guard.js'
 import { scanOutput } from './secret-scanner.js'
 import type { TrustLevel } from './trust-policy.js'
+import { initMemory } from '../memory/namespaces.js'
 
 export interface AgentCallContext {
   agentName: string
@@ -53,6 +56,7 @@ export async function initSecurity(): Promise<void> {
   }
 
   await initAuditLogger()
+  await initMemory()
 
   await auditLog({
     agentName: 'nexus-security',

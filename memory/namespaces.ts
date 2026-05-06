@@ -6,6 +6,7 @@ import { auditLog } from '../security/audit-logger.js'
 import type { EncryptedPayload } from '../security/namespace-isolator.js'
 
 const MEMORY_DIR = join(process.cwd(), 'memory', 'store')
+const REGISTRY_PATH = join(MEMORY_DIR, 'registry.json')
 
 export interface NamespaceEntry {
   keyVersion: number
@@ -31,6 +32,29 @@ const registry = new Map<string, NamespaceEntry>()
 
 async function ensureDir(): Promise<void> {
   await mkdir(MEMORY_DIR, { recursive: true })
+}
+
+async function loadRegistry(): Promise<void> {
+  try {
+    const raw = await readFile(REGISTRY_PATH, 'utf8')
+    const entries = JSON.parse(raw) as Array<[string, NamespaceEntry]>
+    for (const [ns, meta] of entries) {
+      registry.set(ns, meta)
+    }
+  } catch {
+    // file doesn't exist yet — start fresh
+  }
+}
+
+async function saveRegistry(): Promise<void> {
+  await ensureDir()
+  const entries = [...registry.entries()]
+  await writeFile(REGISTRY_PATH, JSON.stringify(entries, null, 2), 'utf8')
+}
+
+export async function initMemory(): Promise<void> {
+  await ensureDir()
+  await loadRegistry()
 }
 
 function namespacePath(namespace: string, keyVersion: number): string {
@@ -60,7 +84,7 @@ async function saveStore(namespace: string, keyVersion: number, store: Map<strin
   await writeFile(path, JSON.stringify(entries, null, 2), 'utf8')
 }
 
-function getOrCreateMeta(namespace: string): NamespaceEntry {
+async function getOrCreateMeta(namespace: string): Promise<NamespaceEntry> {
   const existing = registry.get(namespace)
   if (existing) return existing
   const meta: NamespaceEntry = {
@@ -70,7 +94,29 @@ function getOrCreateMeta(namespace: string): NamespaceEntry {
     entryCount: 0,
   }
   registry.set(namespace, meta)
+  await saveRegistry()
   return meta
+}
+
+export async function rotateNamespaceKey(namespace: string, agentName = 'namespace-isolator'): Promise<void> {
+  const meta = await getOrCreateMeta(namespace)
+  const oldVersion = meta.keyVersion
+  meta.keyVersion += 1
+  meta.lastAccessed = new Date().toISOString()
+  registry.set(namespace, meta)
+  await saveRegistry()
+
+  await auditLog({
+    agentName,
+    action: 'KEY_ROTATION',
+    namespace,
+    outcome: 'ALLOWED',
+    metadata: { oldVersion, newVersion: meta.keyVersion },
+  })
+}
+
+export function getNamespaceMetadata(namespace: string): NamespaceEntry | undefined {
+  return registry.get(namespace)
 }
 
 export async function memoryStore(
@@ -79,7 +125,7 @@ export async function memoryStore(
   namespace: string,
   agentName = 'unknown'
 ): Promise<void> {
-  const meta = getOrCreateMeta(namespace)
+  const meta = await getOrCreateMeta(namespace)
   meta.lastAccessed = new Date().toISOString()
 
   const serialized = JSON.stringify(value)
@@ -89,7 +135,7 @@ export async function memoryStore(
     throw new Error(`Memory storage blocked: PII detected (types: ${piiResult.detectedTypes.join(', ')})`)
   }
 
-  const payload = await encrypt(piiResult.redactedText, namespace)
+  const payload = await encrypt(piiResult.redactedText, namespace, meta.keyVersion)
   const store = await loadStore(namespace, meta.keyVersion)
 
   const entry: StoredMemory = {
@@ -104,6 +150,7 @@ export async function memoryStore(
 
   meta.entryCount = store.size
   registry.set(namespace, meta)
+  await saveRegistry()
 
   await auditLog({
     agentName,
@@ -124,7 +171,7 @@ export async function memorySearch(
     assertNamespaceAccess(agentName, namespace, requestingNamespace)
   }
 
-  const meta = getOrCreateMeta(namespace)
+  const meta = await getOrCreateMeta(namespace)
   meta.lastAccessed = new Date().toISOString()
   registry.set(namespace, meta)
 
@@ -159,7 +206,7 @@ export async function memoryGet(
   namespace: string,
   agentName = 'unknown'
 ): Promise<string | null> {
-  const meta = getOrCreateMeta(namespace)
+  const meta = await getOrCreateMeta(namespace)
   const store = await loadStore(namespace, meta.keyVersion)
   const entry = store.get(key)
   if (!entry) return null
@@ -178,7 +225,7 @@ export async function memoryGet(
 }
 
 export async function memoryDelete(key: string, namespace: string, agentName = 'unknown'): Promise<boolean> {
-  const meta = getOrCreateMeta(namespace)
+  const meta = await getOrCreateMeta(namespace)
   const store = await loadStore(namespace, meta.keyVersion)
   const existed = store.delete(key)
 
@@ -186,6 +233,7 @@ export async function memoryDelete(key: string, namespace: string, agentName = '
     await saveStore(namespace, meta.keyVersion, store)
     meta.entryCount = store.size
     registry.set(namespace, meta)
+    await saveRegistry()
 
     await auditLog({
       agentName,
@@ -211,6 +259,7 @@ export async function pruneNamespace(namespace: string, agentName = 'unknown'): 
   }
 
   registry.delete(namespace)
+  await saveRegistry()
 
   await auditLog({
     agentName,
