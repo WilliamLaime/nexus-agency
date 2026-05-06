@@ -200,7 +200,7 @@ const PII_PATTERNS: PIIPattern[] = [
   },
   {
     type: 'CONTRACT_NUMBER',
-    regex: /(?:contrat|compte|n°|numéro)\s*[:°#]?\s*\d{10,12}\b/gi,
+    regex: /(?:contrat|compte|n[°o]|num[eé]ro|ref(?:erence)?|dossier)\s*[:°#]?\s*[A-Z]{0,4}\d{6,16}\b/gi,
     defaultPolicy: 'BLOCK',
     bankingPolicy: 'BLOCK',
   },
