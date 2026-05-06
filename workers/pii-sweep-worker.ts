@@ -1,9 +1,17 @@
 import { readdir, readFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { initSecurity, detectPII, auditLog } from '../security/index.js'
+import { initSecurity, detectPII, auditLog, decrypt } from '../security/index.js'
+import type { EncryptedPayload } from '../security/index.js'
 
 const MEMORY_DIR = join(process.cwd(), 'memory', 'store')
 const SWEEP_INTERVAL_MS = 24 * 60 * 60 * 1000
+
+interface StoredEntry {
+  key: string
+  value: EncryptedPayload
+  namespace: string
+  storedAt: string
+}
 
 async function sweepMemory(): Promise<void> {
   let files: string[]
@@ -14,34 +22,40 @@ async function sweepMemory(): Promise<void> {
   }
 
   let totalEntries = 0
-  let flaggedFiles = 0
+  let flaggedEntries = 0
+  let errorEntries = 0
 
   for (const file of files) {
-    if (!file.endsWith('.enc.json')) continue
+    if (!file.endsWith('.enc.json') || file === 'registry.json') continue
 
     try {
       const raw = await readFile(join(MEMORY_DIR, file), 'utf8')
-      const entries = JSON.parse(raw) as Array<{ key: string; value: unknown }>
+      const entries = JSON.parse(raw) as StoredEntry[]
 
       for (const entry of entries) {
         totalEntries++
-        const serialized = JSON.stringify(entry.value)
-        const result = await detectPII(serialized, 'memory-sweep', 'pii-sweep-worker')
+        try {
+          const plaintext = await decrypt(entry.value, entry.namespace)
+          const result = await detectPII(plaintext, 'memory-sweep', 'pii-sweep-worker')
 
-        if (!result.clean) {
-          flaggedFiles++
-          await auditLog({
-            agentName: 'pii-sweep-worker',
-            action: 'PII_RESIDUAL_DETECTED',
-            namespace: 'memory-sweep',
-            piiDetected: true,
-            outcome: 'BLOCKED',
-            metadata: {
-              file,
-              entryKey: String(entry.key).slice(0, 64),
-              types: result.detectedTypes.join(','),
-            },
-          })
+          if (!result.clean) {
+            flaggedEntries++
+            await auditLog({
+              agentName: 'pii-sweep-worker',
+              action: 'PII_RESIDUAL_DETECTED',
+              namespace: entry.namespace,
+              piiDetected: true,
+              outcome: 'BLOCKED',
+              metadata: {
+                file,
+                entryKey: String(entry.key).slice(0, 64),
+                types: result.detectedTypes.join(','),
+              },
+            })
+          }
+        } catch {
+          // corrupted entry or missing key version — skip without stopping the sweep
+          errorEntries++
         }
       }
     } catch {
@@ -54,7 +68,7 @@ async function sweepMemory(): Promise<void> {
     action: 'PII_SWEEP_COMPLETE',
     namespace: 'system',
     outcome: 'ALLOWED',
-    metadata: { totalEntries, flaggedFiles },
+    metadata: { totalEntries, flaggedEntries, errorEntries },
   })
 }
 
@@ -69,7 +83,11 @@ async function main(): Promise<void> {
   })
 
   await sweepMemory()
-  setInterval(() => { void sweepMemory() }, SWEEP_INTERVAL_MS)
+
+  const once = process.argv.includes('--once')
+  if (!once) {
+    setInterval(() => { void sweepMemory() }, SWEEP_INTERVAL_MS)
+  }
 }
 
 main().catch((err) => {
