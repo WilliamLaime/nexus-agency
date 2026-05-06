@@ -56,6 +56,62 @@ export interface AgentRunResult {
   durationMs: number
 }
 
+export interface PipelineStep {
+  agentName: string
+  agent: AgentDefinition
+  skipped: boolean
+}
+
+export class Pipeline {
+  readonly steps: PipelineStep[]
+  private readonly _runAgent: (agentName: string, input: string, context: AgentContext, impl: AgentFn) => Promise<AgentRunResult>
+
+  constructor(
+    steps: PipelineStep[],
+    runAgent: (agentName: string, input: string, context: AgentContext, impl: AgentFn) => Promise<AgentRunResult>
+  ) {
+    this.steps = steps
+    this._runAgent = runAgent
+  }
+
+  skip(agentName: string): this {
+    const step = this.steps.find((s) => s.agentName === agentName)
+    if (!step) throw new Error(`Agent "${agentName}" not found in pipeline`)
+    step.skipped = true
+    return this
+  }
+
+  describe(): string {
+    return this.steps
+      .map((s) => (s.skipped ? `[${s.agentName} SKIPPED]` : s.agentName))
+      .join(' → ')
+  }
+
+  async run(
+    initialInput: string,
+    context: AgentContext,
+    implementations: Map<string, AgentFn>
+  ): Promise<AgentRunResult[]> {
+    const results: AgentRunResult[] = []
+    let currentInput = initialInput
+
+    for (const step of this.steps) {
+      if (step.skipped) continue
+
+      const impl = implementations.get(step.agentName)
+      if (!impl) {
+        throw new Error(`No implementation provided for agent "${step.agentName}"`)
+      }
+
+      const result = await this._runAgent(step.agentName, currentInput, context, impl)
+      results.push(result)
+      currentInput = result.output
+    }
+
+    return results
+  }
+}
+
 export class AgentRunner {
   async run(
     agent: AgentDefinition,
@@ -152,6 +208,40 @@ export class NexusOrchestrator {
     }
 
     return results
+  }
+
+  buildPipeline(agentNames: string[]): Pipeline {
+    if (agentNames.length === 0) {
+      throw new Error('Pipeline must have at least one agent')
+    }
+
+    const steps: PipelineStep[] = []
+
+    for (let i = 0; i < agentNames.length; i++) {
+      const name = agentNames[i]
+      if (!name) throw new Error(`Agent name at index ${i} is undefined`)
+
+      const agent = this.agents.get(name)
+      if (!agent) {
+        throw new Error(`Agent "${name}" not registered`)
+      }
+
+      if (i > 0) {
+        const prevName = agentNames[i - 1]
+        if (!prevName) throw new Error(`Agent name at index ${i - 1} is undefined`)
+        const prevAgent = this.agents.get(prevName)
+        if (!prevAgent) throw new Error(`Agent "${prevName}" not registered`)
+        if (!prevAgent.collaboration.sends_to.includes(name)) {
+          throw new Error(
+            `Agent "${prevName}" does not send to "${name}"\n  sends_to: ${prevAgent.collaboration.sends_to.join(', ')}`
+          )
+        }
+      }
+
+      steps.push({ agentName: name, agent, skipped: false })
+    }
+
+    return new Pipeline(steps, this.runAgent.bind(this))
   }
 
   listAgents(): AgentDefinition[] {
