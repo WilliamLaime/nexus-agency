@@ -1,4 +1,4 @@
-import { withSecurityContext, initSecurity } from '../../security/index.js'
+import { withSecurityContext, initSecurity, assertTrustLevel, auditLog } from '../../security/index.js'
 import type { TrustLevel, AgentCallContext, AgentFn } from '../../security/index.js'
 
 export type { TrustLevel }
@@ -120,6 +120,8 @@ export class NexusOrchestrator {
     if (!agent) {
       throw new Error(`Agent "${agentName}" not registered`)
     }
+
+    assertTrustLevel(context.trustLevel, agent.security_rules.trust_level_required, agentName)
 
     return this.runner.run(agent, input, context, implementation)
   }
