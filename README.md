@@ -96,17 +96,33 @@ nexus/
 
 ### Pipeline de sécurité
 
-Chaque appel agent passe par ce pipeline (non contournable) :
+Lorsque tu wraps ton appel LLM avec `withSecurityContext()`, chaque appel agent passe par ce pipeline :
 
 ```
 Input
   ↓ [prompt-injection-guard]  — détecte 20+ patterns d'injection
   ↓ [input-validator]         — validation Zod stricte
   ↓ [pii-detector (input)]    — 14 types PII, politique BLOCK/REDACT/HASH
-  ↓ Agent execution
+  ↓ Agent execution (ta AgentFn)
   ↓ [pii-detector (output)]   — scan de sortie
   ↓ [secret-scanner]          — détecte clés API, tokens, credentials
 Output
+```
+
+```typescript
+// Exemple d'intégration
+import { initSecurity, withSecurityContext } from './security/index.js'
+
+await initSecurity()
+
+const result = await withSecurityContext(
+  async (input, ctx) => {
+    // Ton appel LLM ici (Anthropic, OpenAI, ou autre)
+    return monAppelLLM(input, ctx)
+  },
+  userInput,
+  { agentName: 'product-owner', namespace: 'acme-strategy', trustLevel: 'VERIFIED' }
+)
 ```
 
 ---
@@ -243,9 +259,11 @@ Les 38 agents sont disponibles. Les checklists accessibilité, les system prompt
 
 ---
 
-### Mode runtime autonome (avancé)
+### Mode runtime (avancé)
 
-Si tu veux faire tourner la couche sécurité TypeScript comme un serveur Node.js indépendant (PII detector, audit logger, namespace isolator chiffré...) :
+Nexus est une **bibliothèque TypeScript** de helpers sécurité + system prompts d'agents. Il n'y a pas de runtime LLM intégré — tu fournis toi-même l'appel à l'API de ton choix (Anthropic, OpenAI, etc.) via `withSecurityContext()`.
+
+Pour utiliser la couche sécurité :
 
 **Prérequis** : Node.js 20+, TypeScript 6+
 
@@ -254,9 +272,8 @@ npm install
 cp .env.example .env
 ```
 
-Variables nécessaires uniquement pour ce mode :
+Variables requises pour la couche sécurité :
 ```env
-ANTHROPIC_API_KEY=sk-ant-...                          # clé Anthropic pour les appels LLM
 NEXUS_MEMORY_ENCRYPTION_KEY=$(openssl rand -base64 32) # chiffrement AES-256-GCM des namespaces
 NEXUS_AGENT_SECRET=$(openssl rand -hex 32)             # signature JWT inter-agents
 ```
@@ -346,7 +363,7 @@ Nexus est conçu pour des environnements exigeants incluant les banques et insti
 - **Injection** : 20+ patterns de prompt injection détectés et bloqués (5 catégories + base64)
 - **Secrets** : Scan automatique de tous les outputs avant livraison
 - **Isolation** : Chiffrement AES-256-GCM par namespace client/projet
-- **Audit** : Log immuable et anonymisé RGPD de toutes les actions
+- **Audit** : Log avec chaîne de hash SHA-256 vérifiable, anonymisé RGPD
 - **CVE** : Surveillance hebdomadaire des vulnérabilités dans les dépendances
 
 Voir [SECURITY.md](./SECURITY.md) pour la politique complète.

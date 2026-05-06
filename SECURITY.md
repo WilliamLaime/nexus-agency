@@ -32,7 +32,7 @@ Détecte et bloque les tentatives d'injection de prompt avant toute exécution a
 - Injection encodée : décodage base64 et re-scan
 
 ### `security/input-validator.ts`
-Validation Zod sur 100% des inputs. Tout input hors schéma est rejeté avec log d'audit.
+Validation Zod du contexte d'invocation d'agent (`AgentInputSchema` : prompt, namespace, agentName, trustLevel). Tout input hors schéma est rejeté avec log d'audit. Les inputs spécifiques aux tools nécessitent leur propre schéma.
 
 ### `security/pii-detector.ts`
 Détection de 14 types de données sensibles avec politiques configurables :
@@ -58,12 +58,14 @@ Active le mode bancaire via `NEXUS_BANKING_MODE=true`.
 
 ### `security/namespace-isolator.ts`
 - Isolation stricte par couple (clientId, projectId)
-- Chiffrement AES-256-GCM avec clés dérivées par HKDF
+- Chiffrement AES-256-GCM avec clés dérivées par HMAC-SHA256 sur `(masterKey, namespace:vN, "nexus-namespace")`
 - Un agent sur le client A ne peut jamais lire la mémoire du client B
-- Rotation de clés via `rotateNamespaceKey()`
+- Rotation de clés via `rotateNamespaceKey()` (keyVersion persisté sur disque)
 
 ### `security/audit-logger.ts`
-- Log append-only de toutes les actions agents (jamais de suppression)
+- Log append-mode de toutes les actions agents avec chaîne de hash SHA-256 vérifiable
+- Rupture de chaîne détectable via `verifyAuditChain()` ou au boot avec `NEXUS_VERIFY_AUDIT_CHAIN=true`
+- Pas d'enforcement append-only au niveau OS — pour conformité ACPR stricte, compléter avec un drain vers un système d'audit dédié (CloudWatch immutable, Splunk, etc.)
 - Format JSON structuré, exportable
 - Anonymisation RGPD automatique (PII jamais en clair dans les logs)
 - Rétention configurable (`NEXUS_AUDIT_LOG_RETENTION_DAYS`, défaut : 90 jours)
@@ -71,7 +73,7 @@ Active le mode bancaire via `NEXUS_BANKING_MODE=true`.
 ### `security/trust-policy.ts`
 - Niveaux : `TRUSTED` > `VERIFIED` > `UNTRUSTED`
 - Downgrade automatique sur comportement anormal
-- Validation mTLS pour la fédération inter-machines
+- Authentification inter-agents par JWT signés HMAC-SHA256 (pas de mTLS)
 
 ### `security/secret-scanner.ts`
 - Scan de tous les outputs avant livraison
@@ -110,8 +112,8 @@ NEXUS_PII_POLICY=REDACT        # BLOCK | REDACT | HASH | PASS
 Cette vulnérabilité permet à un repo malveillant de surcharger `ANTHROPIC_BASE_URL` via un fichier de config pour rediriger les appels API vers un serveur tiers.
 
 **Protection Nexus** :
-- Le fichier `.claude/settings.json` est scanné au démarrage
-- Si `ANTHROPIC_BASE_URL` est présent dans un fichier de config repo, Nexus refuse de démarrer
+- Nexus refuse de démarrer si la variable d'environnement `ANTHROPIC_BASE_URL` est définie avec une valeur autre que `api.anthropic.com`
+- **Le scan de fichiers de config (`.claude/settings.json`, `.env`) n'est pas implémenté** — seul `process.env.ANTHROPIC_BASE_URL` est vérifié au démarrage
 - L'audit logger enregistre la tentative
 
 ---
