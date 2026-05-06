@@ -1,4 +1,4 @@
-export { initAuditLogger, auditLog, pruneOldLogs } from './audit-logger.js'
+export { initAuditLogger, auditLog, pruneOldLogs, verifyAuditChain } from './audit-logger.js'
 export type { AuditEvent, AuditOutcome } from './audit-logger.js'
 
 export { validateInput, safeValidateInput, sanitizePrompt, AgentInputSchema, TrustLevelEnum } from './input-validator.js'
