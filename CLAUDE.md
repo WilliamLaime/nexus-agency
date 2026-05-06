@@ -89,8 +89,8 @@ export const MyAgent: AgentDefinition = {
     trust_level_required: 'VERIFIED',
   },
   memory_hooks: {
-    before: 'memory_search(query="...", namespace="{client}-{domain}")',
-    after: 'memory_store(key="pattern-...", value="...", namespace="{client}-{domain}")',
+    before: 'memory_search(query="...", namespace="{client}/{domain}")',
+    after: 'memory_store(key="pattern-...", value="...", namespace="{client}/{domain}")',
   },
   quality_criteria: ['...'],
   collaboration: {
@@ -122,15 +122,15 @@ En mode bancaire, les types PII suivants sont **BLOCK** (pas REDACT) :
 
 ## Structure des namespaces mémoire
 
-Format : `{client-slug}-{domaine}`
+Format : `{client-slug}/{domaine}` — le slash est le délimiteur garanti (les slugs clients ne doivent pas contenir de slash)
 
 ```
-acme-corp-strategy
-acme-corp-design
-acme-corp-security
+acme-corp/strategy
+acme-corp/design
+acme-corp/security
 ```
 
-Un agent ne peut accéder qu'aux namespaces de son client (enforced par `assertNamespaceAccess()`).
+Un agent ne peut accéder qu'aux namespaces de son client (enforced par `assertNamespaceAccess()`). Le clientId est le segment avant le premier slash.
 
 ## Variables d'environnement requises
 

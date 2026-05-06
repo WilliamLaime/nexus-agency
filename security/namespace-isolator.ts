@@ -54,11 +54,13 @@ export async function decrypt(payload: EncryptedPayload, namespace: string): Pro
   return decrypted.toString('utf8')
 }
 
+// Namespace format: "{clientId}/{domain}" — slash is the guaranteed delimiter.
+// Client slugs must not contain slashes. Example: "acme-corp/strategy".
 export function assertNamespaceAccess(requestingAgent: string, requestedNamespace: string, agentNamespace: string): void {
-  const [agentClient] = agentNamespace.split('-')
-  const [requestedClient] = requestedNamespace.split('-')
+  const [agentClient] = agentNamespace.split('/', 2)
+  const [requestedClient] = requestedNamespace.split('/', 2)
 
-  if (agentClient !== requestedClient) {
+  if (!agentClient || !requestedClient || agentClient !== requestedClient) {
     void auditLog({
       agentName: requestingAgent,
       action: 'NAMESPACE_ACCESS_VIOLATION',
