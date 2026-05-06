@@ -8,6 +8,7 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "dev": "tsx examples/run-agent.ts",
+    "pipeline": "node --env-file=.env --import tsx/esm examples/run-pipeline.ts",
     "security:audit": "tsx workers/cve-monitor-worker.ts --once",
     "lint": "tsc --noEmit && npm run validate:graph",
     "validate:graph": "tsx scripts/validate-graph.ts",
