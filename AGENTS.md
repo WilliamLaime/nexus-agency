@@ -383,10 +383,10 @@ Tous les agents sont accessibles via le registre centralisé : `agents/registry.
 | `cve-monitor-worker` | Hebdomadaire | Scan `npm audit` et génération de rapport CVE |
 | `secret-rotation-reminder-worker` | Quotidien | Alerte si clés API > 30 jours sans rotation |
 | `ux-consistency-worker` | Quotidien | Vérification de la cohérence du design system |
-| `seo-monitor-worker` | Hebdomadaire | Snapshot SEO et détection de régressions |
-| `quality-score-worker` | Après livrable | Calcul du score qualité global du projet |
-| `pattern-optimizer-worker` | Nocturne | Distillation des meilleurs patterns en mémoire |
-| `retrospective-worker` | Fin de sprint | Génération automatique de la rétrospective |
+| `seo-monitor-worker` 🚧 | Hebdomadaire | Snapshot SEO et détection de régressions — **STUB** : aucune source de données réelle connectée |
+| `quality-score-worker` 🚧 | Après livrable | Calcul du score qualité global du projet — **STUB** : aucune source de données réelle connectée |
+| `pattern-optimizer-worker` 🚧 | Nocturne | Distillation des meilleurs patterns en mémoire — **STUB** : aucune source de données réelle connectée |
+| `retrospective-worker` 🚧 | Fin de sprint | Génération automatique de la rétrospective — **STUB** : aucune source de données réelle connectée |
 
 ---
 

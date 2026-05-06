@@ -1,3 +1,4 @@
+/** STATUS: STUB — reads from memory store only, no real data sources connected */
 import { initSecurity, auditLog } from '../security/index.js'
 import { memoryStore, memorySearch } from '../memory/namespaces.js'
 
