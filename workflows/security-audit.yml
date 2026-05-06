@@ -22,9 +22,10 @@ security:
 
 steps:
   - id: cve_scan
-    agent: cve-monitor
-    action: run_audit
-    description: "Scan CVE sur toutes les dépendances npm"
+    agent: security-auditor
+    action: run_cve_audit
+    description: "Scan CVE sur toutes les dépendances npm (via cve-monitor-worker en background)"
+    note: "Le worker cve-monitor-worker.ts génère le rapport — security-auditor l'interprète"
     outputs:
       - cve_report
       - critical_count
@@ -32,9 +33,10 @@ steps:
     trust_required: TRUSTED
 
   - id: secret_scan
-    agent: secret-scanner
-    action: scan_codebase
-    description: "Scan de secrets dans le code source et les outputs"
+    agent: security-auditor
+    action: scan_codebase_secrets
+    description: "Scan de secrets dans le code source (via secret-scanner module)"
+    note: "secret-scanner est un module interne à security/, pas un agent autonome"
     outputs:
       - secret_findings
       - clean_codebase
@@ -51,9 +53,10 @@ steps:
     trust_required: TRUSTED
 
   - id: pii_sweep
-    agent: pii-sweep-worker
-    action: full_memory_scan
-    description: "Scan complet de la mémoire vectorielle pour données résiduelles"
+    agent: security-auditor
+    action: full_memory_pii_scan
+    description: "Scan complet de la mémoire vectorielle pour données résiduelles (via pii-sweep-worker en background)"
+    note: "Le worker pii-sweep-worker.ts effectue le scan — security-auditor consolide les findings"
     outputs:
       - pii_findings
       - clean_namespaces

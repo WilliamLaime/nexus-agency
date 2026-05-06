@@ -7,6 +7,7 @@ export { ProjectManager } from './strategy/project-manager.js'
 export { ProductOwner } from './strategy/product-owner.js'
 export { BusinessAnalyst } from './strategy/business-analyst.js'
 export { ScrumMaster } from './strategy/scrum-master.js'
+export { UXResearcher } from './strategy/ux-researcher.js'
 
 // Design
 export { UXDesigner } from './design/ux-designer.js'
@@ -27,6 +28,8 @@ export { BackendDev } from './dev/backend-dev.js'
 export { MobileDev } from './dev/mobile-dev.js'
 export { FullstackDev } from './dev/fullstack-dev.js'
 export { Integrator } from './dev/integrator.js'
+export { Architect } from './dev/architect.js'
+export { TechLead } from './dev/tech-lead.js'
 
 // QA & Qualité
 export { QALead } from './qa/qa-lead.js'
