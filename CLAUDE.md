@@ -1,5 +1,9 @@
 # CLAUDE.md — Nexus Agency
 
+@LESSONS.md
+
+Pour toute tâche non triviale, utilise le mode planification avant d'implémenter.
+
 Instructions pour Claude Code dans ce projet.
 
 ## Vue d'ensemble
