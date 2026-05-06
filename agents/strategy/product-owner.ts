@@ -48,8 +48,8 @@ Règles de sécurité à respecter :
   ],
 
   collaboration: {
-    receives_from: ['account-manager', 'business-analyst'],
-    sends_to: ['project-manager', 'ux-researcher', 'architect'],
+    receives_from: ['account-manager', 'business-analyst', 'ux-researcher', 'project-director'],
+    sends_to: ['project-manager', 'ux-researcher', 'architect', 'ux-designer', 'qa-lead', 'analytics-specialist', 'data-analyst'],
   },
 
   output_format: 'markdown',

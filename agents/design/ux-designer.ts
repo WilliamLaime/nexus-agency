@@ -162,8 +162,8 @@ Un livrable avec des cases non cochées doit être justifié explicitement.
   ],
 
   collaboration: {
-    receives_from: ['product-owner', 'ux-researcher'],
-    sends_to: ['ui-designer', 'frontend-dev', 'copywriter'],
+    receives_from: ['product-owner', 'ux-researcher', 'ux-tester', 'cro-specialist'],
+    sends_to: ['ui-designer', 'frontend-dev', 'copywriter', 'ux-tester'],
   },
 
   output_format: 'markdown',

@@ -65,7 +65,7 @@ Règles absolues :
 
   collaboration: {
     receives_from: ['architect', 'tech-lead', 'security-architect'],
-    sends_to: ['qa-lead', 'devops-engineer'],
+    sends_to: ['qa-lead', 'devops-engineer', 'integrator'],
   },
 
   output_format: 'markdown',

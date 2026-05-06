@@ -68,8 +68,8 @@ Règles absolues :
   ],
 
   collaboration: {
-    receives_from: ['ux-designer', 'content-strategist'],
-    sends_to: ['frontend-dev', 'seo-specialist'],
+    receives_from: ['ux-designer', 'content-strategist', 'seo-specialist', 'translator'],
+    sends_to: ['frontend-dev', 'seo-specialist', 'translator'],
   },
 
   output_format: 'markdown',

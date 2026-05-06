@@ -108,8 +108,8 @@ Règles absolues :
   ],
 
   collaboration: {
-    receives_from: ['tech-lead', 'qa-lead'],
-    sends_to: ['sre', 'account-manager'],
+    receives_from: ['tech-lead', 'qa-lead', 'backend-dev', 'frontend-dev', 'integrator', 'analytics-specialist', 'automation-tester', 'cloud-architect'],
+    sends_to: ['sre', 'account-manager', 'analytics-specialist', 'customer-success', 'rgesn-auditor', 'security-auditor'],
   },
 
   output_format: 'yaml',

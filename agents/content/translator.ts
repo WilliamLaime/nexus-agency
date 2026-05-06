@@ -77,7 +77,7 @@ Règles absolues :
 
   collaboration: {
     receives_from: ['copywriter', 'frontend-dev'],
-    sends_to: ['frontend-dev'],
+    sends_to: ['frontend-dev', 'copywriter'],
   },
 
   output_format: 'json',

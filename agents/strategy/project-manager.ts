@@ -68,7 +68,7 @@ Règles :
   ],
 
   collaboration: {
-    receives_from: ['project-director', 'product-owner'],
+    receives_from: ['project-director', 'product-owner', 'customer-success', 'scrum-master', 'sre'],
     sends_to: ['scrum-master', 'tech-lead', 'account-manager'],
   },
 

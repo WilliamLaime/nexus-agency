@@ -82,8 +82,8 @@ Règles absolues :
   ],
 
   collaboration: {
-    receives_from: ['project-director', 'customer-success'],
-    sends_to: ['project-director', 'product-owner', 'business-analyst'],
+    receives_from: ['project-director', 'customer-success', 'social-media-manager', 'art-director', 'data-analyst', 'compliance-officer', 'sre', 'project-manager', 'devops-engineer'],
+    sends_to: ['project-director', 'product-owner', 'business-analyst', 'content-strategist', 'customer-success'],
   },
 
   output_format: 'markdown',

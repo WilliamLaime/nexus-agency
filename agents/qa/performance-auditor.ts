@@ -87,7 +87,7 @@ Règles :
 
   collaboration: {
     receives_from: ['qa-lead', 'frontend-dev'],
-    sends_to: ['frontend-dev', 'seo-specialist'],
+    sends_to: ['frontend-dev', 'seo-specialist', 'qa-lead'],
   },
 
   output_format: 'markdown',

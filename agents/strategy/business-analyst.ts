@@ -66,7 +66,7 @@ Règles :
 
   collaboration: {
     receives_from: ['account-manager'],
-    sends_to: ['project-director', 'product-owner'],
+    sends_to: ['project-director', 'product-owner', 'content-strategist'],
   },
 
   output_format: 'markdown',

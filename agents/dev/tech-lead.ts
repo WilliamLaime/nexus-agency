@@ -49,8 +49,8 @@ Règles de leadership technique :
   ],
 
   collaboration: {
-    receives_from: ['architect', 'project-manager'],
-    sends_to: ['frontend-dev', 'backend-dev', 'fullstack-dev', 'mobile-dev', 'integrator', 'devops-engineer'],
+    receives_from: ['architect', 'project-manager', 'security-architect', 'security-auditor', 'manual-tester', 'scrum-master'],
+    sends_to: ['frontend-dev', 'backend-dev', 'fullstack-dev', 'mobile-dev', 'integrator', 'devops-engineer', 'qa-lead', 'security-auditor'],
   },
 
   output_format: 'markdown',

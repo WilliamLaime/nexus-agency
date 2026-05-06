@@ -78,8 +78,8 @@ Règles absolues :
   ],
 
   collaboration: {
-    receives_from: ['security-architect', 'security-auditor'],
-    sends_to: ['project-director', 'account-manager'],
+    receives_from: ['security-architect', 'security-auditor', 'rgaa-wcag-auditor', 'rgesn-auditor'],
+    sends_to: ['project-director', 'account-manager', 'rgesn-auditor', 'rgaa-wcag-auditor'],
   },
 
   output_format: 'markdown',

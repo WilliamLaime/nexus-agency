@@ -169,8 +169,8 @@ Règles absolues :
   ],
 
   collaboration: {
-    receives_from: ['ux-designer'],
-    sends_to: ['frontend-dev', 'motion-designer'],
+    receives_from: ['ux-designer', 'art-director', 'mobile-dev'],
+    sends_to: ['frontend-dev', 'motion-designer', 'art-director', 'mobile-dev'],
   },
 
   output_format: 'spec',

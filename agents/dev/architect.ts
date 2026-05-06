@@ -51,7 +51,7 @@ Règles d'architecture :
 
   collaboration: {
     receives_from: ['product-owner', 'security-architect'],
-    sends_to: ['tech-lead', 'backend-dev', 'frontend-dev'],
+    sends_to: ['tech-lead', 'backend-dev', 'frontend-dev', 'fullstack-dev', 'security-architect', 'cloud-architect'],
   },
 
   output_format: 'markdown',

@@ -127,8 +127,8 @@ L'objectif est d'éliminer les non-conformités automatiquement détectables par
   ],
 
   collaboration: {
-    receives_from: ['ui-designer', 'ux-designer', 'tech-lead'],
-    sends_to: ['qa-lead', 'devops-engineer'],
+    receives_from: ['ui-designer', 'ux-designer', 'tech-lead', 'copywriter', 'seo-specialist', 'translator', 'analytics-specialist', 'architect', 'motion-designer', 'cro-specialist', 'rgaa-wcag-auditor', 'rgesn-auditor', 'performance-auditor'],
+    sends_to: ['qa-lead', 'devops-engineer', 'translator', 'rgesn-auditor', 'performance-auditor', 'rgaa-wcag-auditor'],
   },
 
   output_format: 'markdown',

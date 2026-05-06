@@ -83,7 +83,7 @@ Règles absolues :
   ],
 
   collaboration: {
-    receives_from: ['architect', 'security-architect'],
+    receives_from: ['architect', 'security-architect', 'rgesn-auditor'],
     sends_to: ['devops-engineer', 'sre'],
   },
 

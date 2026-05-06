@@ -87,7 +87,7 @@ Règles absolues :
 
   collaboration: {
     receives_from: ['qa-lead', 'ux-designer'],
-    sends_to: ['ux-designer', 'cro-specialist'],
+    sends_to: ['ux-designer', 'cro-specialist', 'qa-lead'],
   },
 
   output_format: 'markdown',

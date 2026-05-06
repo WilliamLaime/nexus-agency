@@ -86,7 +86,7 @@ Règles absolues :
 
   collaboration: {
     receives_from: ['product-owner', 'devops-engineer'],
-    sends_to: ['data-analyst', 'frontend-dev'],
+    sends_to: ['data-analyst', 'frontend-dev', 'devops-engineer'],
   },
 
   output_format: 'spec',

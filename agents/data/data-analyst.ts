@@ -73,7 +73,7 @@ Règles absolues :
 
   collaboration: {
     receives_from: ['analytics-specialist', 'product-owner'],
-    sends_to: ['project-director', 'account-manager'],
+    sends_to: ['project-director', 'account-manager', 'cro-specialist'],
   },
 
   output_format: 'markdown',

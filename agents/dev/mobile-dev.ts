@@ -63,7 +63,7 @@ Règles absolues :
 
   collaboration: {
     receives_from: ['ui-designer', 'tech-lead'],
-    sends_to: ['qa-lead'],
+    sends_to: ['qa-lead', 'ui-designer'],
   },
 
   output_format: 'markdown',

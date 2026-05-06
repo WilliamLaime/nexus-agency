@@ -59,8 +59,8 @@ Règles :
   ],
 
   collaboration: {
-    receives_from: ['account-manager', 'business-analyst'],
-    sends_to: ['project-manager', 'product-owner'],
+    receives_from: ['account-manager', 'business-analyst', 'data-analyst', 'compliance-officer'],
+    sends_to: ['project-manager', 'product-owner', 'account-manager', 'security-architect'],
   },
 
   output_format: 'markdown',

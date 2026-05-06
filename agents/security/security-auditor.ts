@@ -69,8 +69,8 @@ Règles absolues :
   ],
 
   collaboration: {
-    receives_from: ['security-architect', 'tech-lead', 'devops-engineer'],
-    sends_to: ['compliance-officer', 'tech-lead', 'audit-logger'],
+    receives_from: ['security-architect', 'tech-lead', 'devops-engineer', 'qa-lead'],
+    sends_to: ['compliance-officer', 'tech-lead'],
   },
 
   output_format: 'markdown',

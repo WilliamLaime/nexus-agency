@@ -73,8 +73,8 @@ Règles de sécurité :
   ],
 
   collaboration: {
-    receives_from: ['product-owner', 'tech-lead', 'frontend-dev', 'backend-dev'],
-    sends_to: ['manual-tester', 'automation-tester', 'rgaa-wcag-auditor', 'performance-auditor', 'security-auditor'],
+    receives_from: ['product-owner', 'tech-lead', 'frontend-dev', 'backend-dev', 'fullstack-dev', 'integrator', 'mobile-dev', 'automation-tester', 'manual-tester', 'rgaa-wcag-auditor', 'rgesn-auditor', 'ux-tester', 'performance-auditor'],
+    sends_to: ['manual-tester', 'automation-tester', 'rgaa-wcag-auditor', 'performance-auditor', 'security-auditor', 'rgesn-auditor', 'ux-tester', 'devops-engineer'],
   },
 
   output_format: 'markdown',

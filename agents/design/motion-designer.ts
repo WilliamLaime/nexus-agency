@@ -93,7 +93,7 @@ Règles absolues :
 
   collaboration: {
     receives_from: ['ui-designer'],
-    sends_to: ['frontend-dev'],
+    sends_to: ['frontend-dev', 'art-director'],
   },
 
   output_format: 'spec',
