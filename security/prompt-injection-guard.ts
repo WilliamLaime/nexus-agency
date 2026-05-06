@@ -13,8 +13,9 @@ interface InjectionPattern {
   description: string
 }
 
+// Patterns ordered by category. Add language-specific patterns explicitly — do NOT rely on autotranslation.
 const INJECTION_PATTERNS: InjectionPattern[] = [
-  // Direct override
+  // ── DIRECT_OVERRIDE — EN ──────────────────────────────────────────────────
   {
     category: 'DIRECT_OVERRIDE',
     regex: /ignore\s+(?:all\s+)?(?:previous|prior|above)\s+instructions?/i,
@@ -37,6 +38,11 @@ const INJECTION_PATTERNS: InjectionPattern[] = [
   },
   {
     category: 'DIRECT_OVERRIDE',
+    regex: /follow\s+these\s+new\s+directives?\s+instead/i,
+    description: 'follow new directives',
+  },
+  {
+    category: 'DIRECT_OVERRIDE',
     regex: /\[SYSTEM\]/,
     description: '[SYSTEM] tag',
   },
@@ -50,7 +56,28 @@ const INJECTION_PATTERNS: InjectionPattern[] = [
     regex: /###\s*INSTRUCTION/i,
     description: '### INSTRUCTION block',
   },
-  // Role hijacking
+  // ── DIRECT_OVERRIDE — FR ──────────────────────────────────────────────────
+  {
+    category: 'DIRECT_OVERRIDE',
+    regex: /ignore[rz]?\s+(?:les?\s+|toutes\s+(?:les\s+)?)?instructions?\s+(?:précédent|antérieur|au-dessus|précédant)/i,
+    description: 'ignore previous instructions (FR)',
+  },
+  {
+    category: 'DIRECT_OVERRIDE',
+    regex: /oubli[ez]?\s+(?:tes?|tout|les?|toutes?)/i,
+    description: 'forget directive (FR)',
+  },
+  {
+    category: 'DIRECT_OVERRIDE',
+    regex: /nouvelles?\s+instructions?\s*:/i,
+    description: 'new instructions (FR)',
+  },
+  {
+    category: 'DIRECT_OVERRIDE',
+    regex: /ne\s+tiens\s+(?:plus\s+)?compte\s+(?:de\s+)?(?:tes|les|tout)/i,
+    description: 'disregard (FR)',
+  },
+  // ── ROLE_HIJACKING — EN ───────────────────────────────────────────────────
   {
     category: 'ROLE_HIJACKING',
     regex: /you\s+are\s+now\s+(?:a|an|the)\s/i,
@@ -76,7 +103,28 @@ const INJECTION_PATTERNS: InjectionPattern[] = [
     regex: /simulate\s+being\b/i,
     description: 'simulate being [role]',
   },
-  // Jailbreak
+  // ── ROLE_HIJACKING — FR ───────────────────────────────────────────────────
+  {
+    category: 'ROLE_HIJACKING',
+    regex: /tu\s+es\s+(?:maintenant|désormais)\s+(?:un|une|le|la)\s/i,
+    description: 'you are now [role] (FR)',
+  },
+  {
+    category: 'ROLE_HIJACKING',
+    regex: /agis\s+comme\s+(?:si\s+)?(?:un|une|tu)/i,
+    description: 'act as (FR)',
+  },
+  {
+    category: 'ROLE_HIJACKING',
+    regex: /fais\s+(?:comme\s+)?(?:si|semblant)/i,
+    description: 'pretend (FR)',
+  },
+  {
+    category: 'ROLE_HIJACKING',
+    regex: /joue\s+le\s+r[oô]le\s+(?:de|du|d['']un|d['']une)/i,
+    description: 'roleplay as (FR)',
+  },
+  // ── JAILBREAK — EN ────────────────────────────────────────────────────────
   {
     category: 'JAILBREAK',
     regex: /\bDAN\s+(?:mode|prompt)\b/i,
@@ -94,7 +142,7 @@ const INJECTION_PATTERNS: InjectionPattern[] = [
   },
   {
     category: 'JAILBREAK',
-    regex: /bypass\s+(?:safety|filter|restriction|guard|check)/i,
+    regex: /bypass\s+(?:safety|filter|restriction|guard|check|rules?|guidelines?)/i,
     description: 'bypass safety filter',
   },
   {
@@ -107,7 +155,28 @@ const INJECTION_PATTERNS: InjectionPattern[] = [
     regex: /without\s+(?:any\s+)?(?:restrictions?|limits?|rules?|guidelines?)/i,
     description: 'without restrictions',
   },
-  // Context injection
+  // ── JAILBREAK — FR ────────────────────────────────────────────────────────
+  {
+    category: 'JAILBREAK',
+    regex: /contourne[rz]?\s+(?:la\s+)?(?:sécurité|filtre|restriction|garde|protection|règles?)/i,
+    description: 'bypass safety (FR)',
+  },
+  {
+    category: 'JAILBREAK',
+    regex: /sans\s+(?:aucune\s+)?(?:restriction|limite|règle|directive)/i,
+    description: 'without restrictions (FR)',
+  },
+  {
+    category: 'JAILBREAK',
+    regex: /mode\s+(?:développeur|debug|admin)\s+(?:activ|on|engag)/i,
+    description: 'developer mode (FR)',
+  },
+  // ── CONTEXT_INJECTION — EN ────────────────────────────────────────────────
+  {
+    category: 'CONTEXT_INJECTION',
+    regex: /#{1,6}\s*SYSTEM\s+(?:PROMPT|OVERRIDE|INSTRUCTION)/i,
+    description: 'markdown system header',
+  },
   {
     category: 'CONTEXT_INJECTION',
     regex: /```\s*(?:system|instructions?)\b/i,
@@ -132,6 +201,17 @@ const INJECTION_PATTERNS: InjectionPattern[] = [
     category: 'CONTEXT_INJECTION',
     regex: /<\/?s>\s*\[INST\]/,
     description: 'Llama-style injection',
+  },
+  // ── CONTEXT_INJECTION — FR ────────────────────────────────────────────────
+  {
+    category: 'CONTEXT_INJECTION',
+    regex: /<!--\s*(?:système|consigne|instruction)/i,
+    description: 'HTML comment override (FR)',
+  },
+  {
+    category: 'CONTEXT_INJECTION',
+    regex: /```\s*(?:système|consignes?|instructions?)\b/i,
+    description: 'system code block (FR)',
   },
 ]
 
