@@ -146,3 +146,10 @@ vite.config.ts.timestamp-*
 *.key
 *.pem
 /reports/security/*.json
+
+# Nexus
+.DS_Store
+**/.DS_Store
+memory/store/
+coverage/
+.vitest-cache/
