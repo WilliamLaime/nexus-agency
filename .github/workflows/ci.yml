@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npx tsc --noEmit
+      - run: npm run validate:graph
+        env:
+          NEXUS_MEMORY_ENCRYPTION_KEY: ${{ secrets.TEST_ENCRYPTION_KEY || '' }}
+          NEXUS_AGENT_SECRET: ${{ secrets.TEST_AGENT_SECRET || '' }}
+      - run: npm test
+        env:
+          NEXUS_MEMORY_ENCRYPTION_KEY: ${{ secrets.TEST_ENCRYPTION_KEY || '' }}
+          NEXUS_AGENT_SECRET: ${{ secrets.TEST_AGENT_SECRET || '' }}
+          NEXUS_SKIP_CVE2026_CHECK: 'true'
+
+  cve-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm audit --audit-level=high
