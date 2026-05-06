@@ -74,7 +74,7 @@ Règles de sécurité :
 
   collaboration: {
     receives_from: ['product-owner', 'tech-lead', 'frontend-dev', 'backend-dev'],
-    sends_to: ['manual-tester', 'automation-tester', 'a11y-auditor', 'performance-auditor', 'security-auditor'],
+    sends_to: ['manual-tester', 'automation-tester', 'rgaa-wcag-auditor', 'performance-auditor', 'security-auditor'],
   },
 
   output_format: 'markdown',
